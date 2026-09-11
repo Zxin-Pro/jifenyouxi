@@ -5,10 +5,10 @@
   "name": "积分游戏",
   "description": "融入Minecraft原版玩法的积分游戏系统模组",
   "authors": [
-    "Jifenyouxi Dev"
+    "Zxin-Pro"
   ],
   "contact": {
-    "homepage": "https://github.com/Zxin-Pro/astrbot_plugin_point_games"
+    "homepage": "https://github.com/Zxin-Pro/jifenyouxi"
   },
   "license": "MIT",
   "icon": "assets/jifenyouxi/icon.png",
@@ -22,8 +22,8 @@
     "jifenyouxi.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.16.0",
-    "minecraft": "~1.21.1",
+    "fabricloader": ">=0.19.0",
+    "minecraft": "~1.21.11",
     "java": ">=21",
     "fabric-api": "*"
   }
