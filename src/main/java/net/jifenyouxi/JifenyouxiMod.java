@@ -11,6 +11,8 @@ import net.jifenyouxi.entity.ModVillagers;
 import net.jifenyouxi.event.*;
 import net.jifenyouxi.item.ModItems;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.command.permission.Permission;
+import net.minecraft.command.permission.PermissionLevel;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -78,7 +80,7 @@ public class JifenyouxiMod implements ModInitializer {
                         return 1;
                     })
                     .then(CommandManager.literal("add")
-                            .requires(source -> source.hasPermission(2))
+                            .requires(source -> source.hasPermission(new Permission.Level(PermissionLevel.GAMEMASTERS)))
                             .then(CommandManager.argument("player", EntityArgumentType.player())
                                     .then(CommandManager.argument("amount", IntegerArgumentType.integer(1))
                                             .executes(context -> {

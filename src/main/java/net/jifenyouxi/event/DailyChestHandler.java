@@ -22,7 +22,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProperties;
 
 import java.util.Random;
 
@@ -96,8 +95,7 @@ public class DailyChestHandler {
         }
 
         // 读取真实的世界出生点坐标 (替代旧版硬编码 0,70,0)
-        WorldProperties props = world.getLevelProperties();
-        BlockPos spawn = new BlockPos(props.getSpawnX(), props.getSpawnY(), props.getSpawnZ());
+        BlockPos spawn = world.getLevelProperties().getSpawnPoint().getPos();
 
         // 放置宝箱并清理上方遮挡，确保任何地形下都可见可点
         currentChestPos = spawn;
