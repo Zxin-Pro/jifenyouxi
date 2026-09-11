@@ -1,6 +1,8 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube_bottom_top",
   "textures": {
-    "all": "jifenyouxi:block/card_table"
+    "top": "jifenyouxi:block/card_table_top",
+    "side": "jifenyouxi:block/card_table_side",
+    "bottom": "jifenyouxi:block/card_table_bottom"
   }
 }
