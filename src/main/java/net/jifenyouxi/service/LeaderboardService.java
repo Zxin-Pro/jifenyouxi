@@ -32,8 +32,8 @@ public class LeaderboardService {
 
         // 如果没有显式注册的告示牌，在出生点周边 10 格内自动探测带 [积分榜] 标记的告示牌
         if (REGISTERED_SIGNS.isEmpty()) {
-            BlockPos spawn = new BlockPos(world.getProperties().getSpawnX(), world.getProperties().getSpawnY(), world.getProperties().getSpawnZ());
-            for (BlockPos p : BlockPos.iterate(spawn.add(-10, -3, -10), spawn.add(10, 5, 10))) {
+            BlockPos spawn = new BlockPos(0, 70, 0);
+            for (BlockPos p : BlockPos.iterate(spawn.add(-15, -10, -15), spawn.add(15, 10, 15))) {
                 BlockEntity be = world.getBlockEntity(p);
                 if (be instanceof SignBlockEntity sign) {
                     String line0 = sign.getFrontText().getMessage(0, false).getString();

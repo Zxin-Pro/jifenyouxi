@@ -67,7 +67,7 @@ public class DailyChestHandler {
                         .append(Text.literal(" 第一个开启了出生点宝箱！斩获 "))
                         .append(Text.literal(points + " 积分").formatted(Formatting.YELLOW, Formatting.BOLD))
                         .append(Text.literal(" 与丰厚神秘大礼！"));
-                serverPlayer.server.getPlayerManager().broadcast(broadcast, false);
+                sw.getServer().getPlayerManager().broadcast(broadcast, false);
 
                 return ActionResult.PASS;
             }
@@ -86,7 +86,7 @@ public class DailyChestHandler {
             claimedToday = false;
 
             // 放置在出生点正上方安全位置
-            BlockPos spawn = new BlockPos(world.getProperties().getSpawnX(), world.getProperties().getSpawnY(), world.getProperties().getSpawnZ());
+            BlockPos spawn = new BlockPos(0, 70, 0);
             currentChestPos = spawn.up();
             world.setBlockState(currentChestPos, Blocks.CHEST.getDefaultState());
 

@@ -79,7 +79,7 @@ public class CustomFishItem extends Item {
                         .append(Text.literal(String.valueOf(value)).formatted(Formatting.YELLOW, Formatting.BOLD))
                         .append(Text.literal(" 积分！"));
 
-                serverPlayer.server.getPlayerManager().broadcast(broadcast, false);
+                ((net.minecraft.server.world.ServerWorld) serverPlayer.getEntityWorld()).getServer().getPlayerManager().broadcast(broadcast, false);
             }
 
             return ActionResult.SUCCESS;
