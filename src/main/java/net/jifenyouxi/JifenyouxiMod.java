@@ -11,8 +11,7 @@ import net.jifenyouxi.entity.ModVillagers;
 import net.jifenyouxi.event.*;
 import net.jifenyouxi.item.ModItems;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.permission.Permission;
-import net.minecraft.command.permission.PermissionLevel;
+import net.minecraft.server.PlayerConfigEntry;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -80,7 +79,12 @@ public class JifenyouxiMod implements ModInitializer {
                         return 1;
                     })
                     .then(CommandManager.literal("add")
-                            .requires(source -> source.hasPermission(new Permission.Level(PermissionLevel.GAMEMASTERS)))
+                            .requires(source -> {
+                                // 控制台放行，游戏内仅允许 OP 使用
+                                if (source.getPlayer() == null) return true;
+                                return source.getServer().getPlayerManager()
+                                        .isOperator(new PlayerConfigEntry(source.getPlayer().getUuid(), source.getPlayer().getName().getString()));
+                            })
                             .then(CommandManager.argument("player", EntityArgumentType.player())
                                     .then(CommandManager.argument("amount", IntegerArgumentType.integer(1))
                                             .executes(context -> {
