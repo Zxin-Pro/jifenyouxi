@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.jifenyouxi.JifenyouxiMod;
 import net.jifenyouxi.database.DatabaseManager;
 import net.jifenyouxi.item.CardItem;
+import net.jifenyouxi.item.CustomFishItem;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -103,11 +104,14 @@ public class DailyChestHandler {
         world.setBlockState(spawn.up(), Blocks.AIR.getDefaultState());
         world.setBlockState(spawn.up(2), Blocks.AIR.getDefaultState());
 
-        // 在宝箱内预填基础战利品，避免开箱空空如也
+        // 在宝箱内预填战利品：基础物资 + 每日随机稀有物（含模组卡牌与传说鱼）
         if (world.getBlockEntity(spawn) instanceof ChestBlockEntity chest) {
             chest.setStack(4, new ItemStack(Items.GOLD_INGOT, 3 + RANDOM.nextInt(6)));
             chest.setStack(12, new ItemStack(Items.EMERALD, 2 + RANDOM.nextInt(5)));
             chest.setStack(22, new ItemStack(Items.EXPERIENCE_BOTTLE, 4 + RANDOM.nextInt(8)));
+            // 两个随机稀有槽位，每天都有不同惊喜
+            fillRandomBonus(chest, 8);
+            fillRandomBonus(chest, 16);
             chest.markDirty();
         }
 
@@ -120,5 +124,23 @@ public class DailyChestHandler {
                         .append(Text.literal("，首位开启者有大奖！")).formatted(Formatting.GOLD, Formatting.BOLD),
                 false
         );
+    }
+
+    /**
+     * 每日随机稀有奖励：原版珍品 + 模组物品（SSR 卡牌 / 传说鱼获）都能刷出
+     */
+    private static void fillRandomBonus(ChestBlockEntity chest, int slot) {
+        switch (RANDOM.nextInt(10)) {
+            case 0 -> chest.setStack(slot, new ItemStack(Items.DIAMOND, 1 + RANDOM.nextInt(3)));
+            case 1 -> chest.setStack(slot, new ItemStack(Items.GOLDEN_APPLE, 1 + RANDOM.nextInt(2)));
+            case 2 -> chest.setStack(slot, new ItemStack(Items.ENCHANTED_GOLDEN_APPLE, 1));
+            case 3 -> chest.setStack(slot, new ItemStack(Items.TOTEM_OF_UNDYING, 1));
+            case 4 -> chest.setStack(slot, new ItemStack(Items.NETHERITE_INGOT, 1 + RANDOM.nextInt(2)));
+            case 5 -> chest.setStack(slot, new ItemStack(Items.ENDER_PEARL, 2 + RANDOM.nextInt(4)));
+            case 6 -> chest.setStack(slot, CustomFishItem.createFish("🌟 祥瑞锦鲤王", 300, "史诗", Formatting.GOLD));
+            case 7 -> chest.setStack(slot, CustomFishItem.createFish("🔱 远古利维坦幻影", 666, "传说", Formatting.LIGHT_PURPLE));
+            case 8 -> chest.setStack(slot, CardItem.createCard("宝箱守护者之魂", "SSR", 999, Formatting.LIGHT_PURPLE));
+            default -> chest.setStack(slot, CardItem.createCard("凋灵之骨", "SR", 850, Formatting.GOLD));
+        }
     }
 }

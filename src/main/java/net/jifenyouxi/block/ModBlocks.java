@@ -14,7 +14,6 @@ public class ModBlocks {
             AbstractBlock.Settings.create()
                     .registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(JifenyouxiMod.MOD_ID, "card_table")))
                     .strength(2.5f)
-                    .requiresTool()
     );
 
     public static final Block PUZZLE_BLOCK = new PuzzleBlock(
@@ -24,8 +23,22 @@ public class ModBlocks {
                     .luminance(state -> 12)
     );
 
+    public static final Block GAMBLING_TABLE_BLOCK = new GamblingTableBlock(
+            AbstractBlock.Settings.create()
+                    .registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(JifenyouxiMod.MOD_ID, "gambling_table")))
+                    .strength(2.5f)
+    );
+
+    public static final Block BANKER_DESK_BLOCK = new BankerDeskBlock(
+            AbstractBlock.Settings.create()
+                    .registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(JifenyouxiMod.MOD_ID, "banker_desk")))
+                    .strength(3.0f)
+    );
+
     public static void registerBlocks() {
         Registry.register(Registries.BLOCK, Identifier.of(JifenyouxiMod.MOD_ID, "card_table"), CARD_TABLE_BLOCK);
         Registry.register(Registries.BLOCK, Identifier.of(JifenyouxiMod.MOD_ID, "puzzle_block"), PUZZLE_BLOCK);
+        Registry.register(Registries.BLOCK, Identifier.of(JifenyouxiMod.MOD_ID, "gambling_table"), GAMBLING_TABLE_BLOCK);
+        Registry.register(Registries.BLOCK, Identifier.of(JifenyouxiMod.MOD_ID, "banker_desk"), BANKER_DESK_BLOCK);
     }
 }

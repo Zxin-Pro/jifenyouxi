@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.jifenyouxi.block.ModBlocks;
 import net.jifenyouxi.database.DatabaseManager;
-import net.jifenyouxi.entity.ModVillagers;
 import net.jifenyouxi.event.*;
 import net.jifenyouxi.item.ModItems;
 import net.minecraft.command.argument.EntityArgumentType;
@@ -38,7 +37,6 @@ public class JifenyouxiMod implements ModInitializer {
         BedCheckInHandler.register();
         EnderChestBankHandler.register();
         DailyChestHandler.register();
-        ModVillagers.registerVillagerEvents();
         ScheduledTasks.register();
 
         // 3. 拦截答题聊天消息
