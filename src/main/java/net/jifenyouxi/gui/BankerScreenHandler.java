@@ -12,6 +12,7 @@ import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
@@ -100,11 +101,12 @@ public class BankerScreenHandler extends GenericContainerScreenHandler {
             return;
         }
 
-        if (player.getWorld().isClient() || !(player instanceof ServerPlayerEntity serverPlayer)) {
+        if (player.getEntityWorld().isClient() || !(player instanceof ServerPlayerEntity serverPlayer)) {
             return;
         }
 
-        long currentDay = serverPlayer.getServerWorld().getTime() / 24000L;
+        ServerWorld sw = (ServerWorld) serverPlayer.getEntityWorld();
+        long currentDay = sw.getTime() / 24000L;
 
         if (slotIndex == SLOT_LOAN_100) {
             applyLoan(serverPlayer, 100, 10, currentDay + 3);
@@ -135,7 +137,8 @@ public class BankerScreenHandler extends GenericContainerScreenHandler {
 
         boolean ok = DatabaseManager.applyLoan(p.getUuid(), amount, interest, String.valueOf(dueDay));
         if (ok) {
-            p.getServerWorld().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 1.0f, 1.0f);
+            ServerWorld sw = (ServerWorld) p.getEntityWorld();
+            sw.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 1.0f, 1.0f);
             p.sendMessage(Text.literal("✅ [贷款成功] 成功向银行借款 ")
                     .append(Text.literal(String.valueOf(amount)).formatted(Formatting.GOLD))
                     .append(Text.literal(" 积分！到期需归还本息共计: "))
@@ -167,7 +170,8 @@ public class BankerScreenHandler extends GenericContainerScreenHandler {
 
         boolean ok = DatabaseManager.repayLoan(p.getUuid(), toRepay.id());
         if (ok) {
-            p.getServerWorld().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1.0f, 1.2f);
+            ServerWorld sw = (ServerWorld) p.getEntityWorld();
+            sw.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1.0f, 1.2f);
             p.sendMessage(Text.literal("🎉 [还款成功] 成功归还贷款 #" + toRepay.id() + "，本息合计: " + totalDue + " 积分！信用恢复！").formatted(Formatting.GREEN), false);
         }
     }

@@ -20,7 +20,7 @@ public class FishingHandler {
     private static final Random RANDOM = new Random();
 
     public static ItemStack rollCustomFish(PlayerEntity player, BlockPos pos) {
-        World world = player.getWorld();
+        World world = player.getEntityWorld();
         long time = world.getTimeOfDay() % 24000;
         boolean isNight = time >= 13000 && time <= 23000;
 

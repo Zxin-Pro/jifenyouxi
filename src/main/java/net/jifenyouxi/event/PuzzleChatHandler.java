@@ -76,7 +76,7 @@ public class PuzzleChatHandler {
         }
 
         String input = message.trim();
-        ServerWorld world = player.getServerWorld();
+        ServerWorld world = (ServerWorld) player.getEntityWorld();
         BlockPos pos = puzzle.pos();
 
         if (input.equalsIgnoreCase(puzzle.answer()) || input.contains(puzzle.answer())) {

@@ -13,6 +13,7 @@ import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
@@ -89,7 +90,7 @@ public class GamblerScreenHandler extends GenericContainerScreenHandler {
             return;
         }
 
-        if (player.getWorld().isClient() || !(player instanceof ServerPlayerEntity serverPlayer)) {
+        if (player.getEntityWorld().isClient() || !(player instanceof ServerPlayerEntity serverPlayer)) {
             return;
         }
 
@@ -115,18 +116,19 @@ public class GamblerScreenHandler extends GenericContainerScreenHandler {
             return;
         }
 
+        ServerWorld sw = (ServerWorld) p.getEntityWorld();
         int r = RANDOM.nextInt(100);
         if (r < 5) {
             // 5倍
             int win = cost * 5;
             DatabaseManager.addPoints(p.getUuid(), win, "转盘大奖");
-            p.getServerWorld().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.PLAYERS, 1.0f, 1.0f);
+            sw.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.PLAYERS, 1.0f, 1.0f);
             p.sendMessage(Text.literal("🎉 [大转盘] 欧气爆发！命中 5 倍终极大奖！获得 " + win + " 积分！").formatted(Formatting.LIGHT_PURPLE, Formatting.BOLD), false);
         } else if (r < 30) {
             // 2倍
             int win = cost * 2;
             DatabaseManager.addPoints(p.getUuid(), win, "转盘翻倍");
-            p.getServerWorld().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1.0f, 1.2f);
+            sw.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1.0f, 1.2f);
             p.sendMessage(Text.literal("✨ [大转盘] 恭喜中奖！命中 2 倍奖励！获得 " + win + " 积分！").formatted(Formatting.YELLOW), false);
         } else if (r < 60) {
             // 保本
@@ -134,7 +136,7 @@ public class GamblerScreenHandler extends GenericContainerScreenHandler {
             p.sendMessage(Text.literal("🤝 [大转盘] 运气平平，退回本金 " + cost + " 积分。").formatted(Formatting.GRAY), false);
         } else {
             // 未中奖
-            p.getServerWorld().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BLOCK_CHEST_LOCKED, SoundCategory.PLAYERS, 0.8f, 0.8f);
+            sw.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BLOCK_CHEST_LOCKED, SoundCategory.PLAYERS, 0.8f, 0.8f);
             p.sendMessage(Text.literal("💨 [大转盘] 谢谢惠顾，距离大奖就差一点点了喵~").formatted(Formatting.RED), false);
         }
     }
@@ -146,6 +148,7 @@ public class GamblerScreenHandler extends GenericContainerScreenHandler {
             return;
         }
 
+        ServerWorld sw = (ServerWorld) p.getEntityWorld();
         String[] fruits = {"🍎苹果", "🍉西瓜", "🍇葡萄", "🔔金钟", "💎钻石"};
         int f1 = RANDOM.nextInt(fruits.length);
         int f2 = RANDOM.nextInt(fruits.length);
@@ -155,7 +158,7 @@ public class GamblerScreenHandler extends GenericContainerScreenHandler {
         if (f1 == f2 && f2 == f3) {
             int win = (f1 == 4) ? 500 : 200;
             DatabaseManager.addPoints(p.getUuid(), win, "水果机三连");
-            p.getServerWorld().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.PLAYERS, 1.0f, 1.0f);
+            sw.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.PLAYERS, 1.0f, 1.0f);
             p.sendMessage(Text.literal("🎰 [水果机] " + line + " ！！！完美三连！赢得 " + win + " 积分！").formatted(Formatting.GOLD, Formatting.BOLD), false);
         } else if (f1 == f2 || f2 == f3 || f1 == f3) {
             int win = 60;

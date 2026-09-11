@@ -66,7 +66,8 @@ public class EnderChestBankHandler {
 
         if (actualAdded > 0) {
             DatabaseManager.addPoints(player.getUuid(), actualAdded * 10, "末影箱存款利息");
-            player.getServerWorld().playSound(null, player.getX(), player.getY(), player.getZ(),
+            ServerWorld sw = (ServerWorld) player.getEntityWorld();
+            sw.playSound(null, player.getX(), player.getY(), player.getZ(),
                     SoundEvents.BLOCK_AMETHYST_BLOCK_CHIME, SoundCategory.PLAYERS, 1.0f, 1.2f);
             player.sendMessage(Text.literal("💰 [末影箱银行] 叮！你的末影箱收到了今日 5% 利息: ")
                     .append(Text.literal(actualAdded + " 块金锭").formatted(Formatting.GOLD, Formatting.BOLD))

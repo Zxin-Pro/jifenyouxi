@@ -71,7 +71,7 @@ public class CardTableBlock extends Block {
                         .append(Text.literal(" 一发入魂抽出了传说级卡牌【"))
                         .append(Text.literal(cardName).formatted(Formatting.LIGHT_PURPLE, Formatting.BOLD))
                         .append(Text.literal("】！"));
-                serverPlayer.getServer().getPlayerManager().broadcast(broadcast, false);
+                serverPlayer.server.getPlayerManager().broadcast(broadcast, false);
 
                 // 欧皇音效与全屏粒子
                 world.playSound(null, pos, SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.BLOCKS, 1.0f, 1.0f);

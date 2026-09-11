@@ -57,7 +57,7 @@ public class DailyChestHandler {
                 }
 
                 // 特效与音效
-                ServerWorld sw = serverPlayer.getServerWorld();
+                ServerWorld sw = (ServerWorld) serverPlayer.getEntityWorld();
                 sw.playSound(null, hitPos, SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.BLOCKS, 1.0f, 1.0f);
                 sw.spawnParticles(ParticleTypes.FIREWORK, hitPos.getX() + 0.5, hitPos.getY() + 1.2, hitPos.getZ() + 0.5, 50, 0.5, 0.5, 0.5, 0.15);
 
@@ -67,7 +67,7 @@ public class DailyChestHandler {
                         .append(Text.literal(" 第一个开启了出生点宝箱！斩获 "))
                         .append(Text.literal(points + " 积分").formatted(Formatting.YELLOW, Formatting.BOLD))
                         .append(Text.literal(" 与丰厚神秘大礼！"));
-                serverPlayer.getServer().getPlayerManager().broadcast(broadcast, false);
+                serverPlayer.server.getPlayerManager().broadcast(broadcast, false);
 
                 return ActionResult.PASS;
             }
@@ -86,7 +86,7 @@ public class DailyChestHandler {
             claimedToday = false;
 
             // 放置在出生点正上方安全位置
-            BlockPos spawn = world.getSpawnPos();
+            BlockPos spawn = new BlockPos(world.getProperties().getSpawnX(), world.getProperties().getSpawnY(), world.getProperties().getSpawnZ());
             currentChestPos = spawn.up();
             world.setBlockState(currentChestPos, Blocks.CHEST.getDefaultState());
 

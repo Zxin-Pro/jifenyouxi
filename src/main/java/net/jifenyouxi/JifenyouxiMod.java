@@ -78,7 +78,7 @@ public class JifenyouxiMod implements ModInitializer {
                         return 1;
                     })
                     .then(CommandManager.literal("add")
-                            .requires(source -> source.hasPermissionLevel(2))
+                            .requires(source -> source.hasPermissions(2))
                             .then(CommandManager.argument("player", EntityArgumentType.player())
                                     .then(CommandManager.argument("amount", IntegerArgumentType.integer(1))
                                             .executes(context -> {

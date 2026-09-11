@@ -23,7 +23,7 @@ public abstract class FishingBobberEntityMixin {
     @Inject(method = "use", at = @At("HEAD"))
     private void onHookUse(ItemStack usedItem, CallbackInfoReturnable<Integer> cir) {
         FishingBobberEntity bobber = (FishingBobberEntity) (Object) this;
-        World world = bobber.getWorld();
+        World world = bobber.getEntityWorld();
 
         if (!world.isClient() && this.caughtFish) {
             PlayerEntity player = this.getPlayerOwner();

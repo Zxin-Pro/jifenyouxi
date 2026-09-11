@@ -2,19 +2,19 @@ package net.jifenyouxi.item;
 
 import net.jifenyouxi.database.DatabaseManager;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.LoreComponent;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -33,17 +33,22 @@ public class CardItem extends Item {
 
         stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
         stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("[" + rarity + "] " + cardName).formatted(color, Formatting.BOLD));
+        stack.set(DataComponentTypes.LORE, new LoreComponent(List.of(
+                Text.literal("品质: " + rarity).formatted(Formatting.AQUA),
+                Text.literal("战力: " + power).formatted(Formatting.GREEN),
+                Text.literal("👉 [右键] 可将重复卡牌分解为保底积分").formatted(Formatting.GRAY)
+        )));
         return stack;
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
         if (!world.isClient() && user instanceof ServerPlayerEntity player) {
             NbtComponent comp = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT);
             NbtCompound nbt = comp.copyNbt();
 
-            String rarity = nbt.getString("CardRarity");
+            String rarity = nbt.getString("CardRarity").orElse("N");
             int recycleValue = switch (rarity) {
                 case "SSR" -> 300;
                 case "SR" -> 80;
@@ -61,20 +66,8 @@ public class CardItem extends Item {
                     .append(Text.literal(String.valueOf(recycleValue)).formatted(Formatting.YELLOW))
                     .append(Text.literal(" 积分！")), false);
 
-            return TypedActionResult.success(stack);
+            return ActionResult.SUCCESS;
         }
-        return TypedActionResult.consume(stack);
-    }
-
-    @Override
-    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
-        NbtComponent comp = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT);
-        NbtCompound nbt = comp.copyNbt();
-
-        if (nbt.contains("CardRarity")) {
-            tooltip.add(Text.literal("品质: " + nbt.getString("CardRarity")).formatted(Formatting.AQUA));
-            tooltip.add(Text.literal("战力: " + nbt.getInt("CardPower")).formatted(Formatting.GREEN));
-            tooltip.add(Text.literal("👉 [右键] 可将重复卡牌分解为保底积分").formatted(Formatting.GRAY));
-        }
+        return ActionResult.CONSUME;
     }
 }
