@@ -98,6 +98,17 @@ public class DatabaseManager {
                         best_fish TEXT DEFAULT ''
                     );
                 """);
+
+                // 6. 每日游玩次数限制表
+                stmt.execute("""
+                    CREATE TABLE IF NOT EXISTS play_limits (
+                        uuid TEXT,
+                        game TEXT,
+                        day TEXT,
+                        count INTEGER DEFAULT 0,
+                        PRIMARY KEY (uuid, game)
+                    );
+                """);
             }
         }
     }
@@ -323,6 +334,85 @@ public class DatabaseManager {
                 }
             } catch (SQLException ignored) {}
             return 0;
+        }
+    }
+
+    // ================== 游玩次数与冷却控制 ==================
+
+    private static final java.util.concurrent.ConcurrentHashMap<String, Long> LAST_PLAY_TS = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final long PLAY_COOLDOWN_MS = 5000L;
+
+    /** 距离下次可玩还剩多少秒（0 表示可玩） */
+    public static long getCooldownRemaining(UUID uuid, String game) {
+        Long last = LAST_PLAY_TS.get(uuid + ":" + game);
+        if (last == null) return 0;
+        long remain = PLAY_COOLDOWN_MS - (System.currentTimeMillis() - last);
+        return Math.max(0, remain / 1000);
+    }
+
+    public static void markPlayed(UUID uuid, String game) {
+        LAST_PLAY_TS.put(uuid + ":" + game, System.currentTimeMillis());
+    }
+
+    /** 记录一次游玩；超过每日限额返回 false（每个 MC 游戏日自动重置） */
+    public static boolean tryRecordDailyPlay(UUID uuid, String game, long mcDay, int dailyLimit) {
+        synchronized (DB_LOCK) {
+            try {
+                connection.setAutoCommit(false);
+                String day = null;
+                int count = 0;
+                try (PreparedStatement q = connection.prepareStatement("SELECT day, count FROM play_limits WHERE uuid = ? AND game = ?")) {
+                    q.setString(1, uuid.toString());
+                    q.setString(2, game);
+                    try (ResultSet rs = q.executeQuery()) {
+                        if (rs.next()) {
+                            day = rs.getString("day");
+                            count = rs.getInt("count");
+                        }
+                    }
+                }
+
+                if (day == null) {
+                    try (PreparedStatement ins = connection.prepareStatement("INSERT INTO play_limits (uuid, game, day, count) VALUES (?, ?, ?, 1)")) {
+                        ins.setString(1, uuid.toString());
+                        ins.setString(2, game);
+                        ins.setString(3, String.valueOf(mcDay));
+                        ins.executeUpdate();
+                    }
+                    connection.commit();
+                    return true;
+                }
+
+                if (!day.equals(String.valueOf(mcDay))) {
+                    try (PreparedStatement upd = connection.prepareStatement("UPDATE play_limits SET day = ?, count = 1 WHERE uuid = ? AND game = ?")) {
+                        upd.setString(1, String.valueOf(mcDay));
+                        upd.setString(2, uuid.toString());
+                        upd.setString(3, game);
+                        upd.executeUpdate();
+                    }
+                    connection.commit();
+                    return true;
+                }
+
+                if (count >= dailyLimit) {
+                    connection.rollback();
+                    return false;
+                }
+
+                try (PreparedStatement upd = connection.prepareStatement("UPDATE play_limits SET count = count + 1 WHERE uuid = ? AND game = ?")) {
+                    upd.setString(1, uuid.toString());
+                    upd.setString(2, game);
+                    upd.executeUpdate();
+                }
+                connection.commit();
+                return true;
+            } catch (SQLException e) {
+                try { connection.rollback(); } catch (SQLException ignored) {}
+                LOGGER.error("记录游玩次数失败: {}", uuid, e);
+                return false;
+            } finally {
+                try { connection.setAutoCommit(true); } catch (SQLException ignored) {}
+            }
         }
     }
 

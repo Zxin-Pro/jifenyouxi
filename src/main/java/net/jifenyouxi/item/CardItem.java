@@ -50,10 +50,10 @@ public class CardItem extends Item {
 
             String rarity = nbt.getString("CardRarity").orElse("N");
             int recycleValue = switch (rarity) {
-                case "SSR" -> 300;
-                case "SR" -> 80;
-                case "R" -> 20;
-                default -> 5;
+                case "SSR" -> 120;
+                case "SR" -> 40;
+                case "R" -> 8;
+                default -> 1;
             };
 
             // 玩家可选择右键分解多余卡牌换取保底积分
