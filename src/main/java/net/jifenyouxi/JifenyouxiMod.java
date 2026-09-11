@@ -78,13 +78,56 @@ public class JifenyouxiMod implements ModInitializer {
                         return 1;
                     })
                     .then(CommandManager.literal("add")
+                            .requires(source -> source.hasPermission(2))
                             .then(CommandManager.argument("player", EntityArgumentType.player())
                                     .then(CommandManager.argument("amount", IntegerArgumentType.integer(1))
                                             .executes(context -> {
                                                 ServerPlayerEntity target = EntityArgumentType.getPlayer(context, "player");
                                                 int amt = IntegerArgumentType.getInteger(context, "amount");
                                                 DatabaseManager.addPoints(target.getUuid(), amt, "管理员指令增加");
-                                                context.getSource().sendMessage(Text.literal("已成功给玩家 " + target.getName().getString() + " 增加 " + amt + " 积分。"));
+                                                context.getSource().sendFeedback(() -> Text.literal("✅ 已成功给玩家 ")
+                                                        .append(Text.literal(target.getName().getString()).formatted(Formatting.AQUA))
+                                                        .append(Text.literal(" 增加 "))
+                                                        .append(Text.literal(String.valueOf(amt)).formatted(Formatting.GOLD, Formatting.BOLD))
+                                                        .append(Text.literal(" 积分。")), false);
+                                                target.sendMessage(Text.literal("📨 管理员为你增加了 ")
+                                                        .append(Text.literal(String.valueOf(amt)).formatted(Formatting.GOLD, Formatting.BOLD))
+                                                        .append(Text.literal(" 积分！")), false);
+                                                return 1;
+                                            })
+                                    )
+                            )
+                    )
+                    .then(CommandManager.literal("pay")
+                            .then(CommandManager.argument("player", EntityArgumentType.player())
+                                    .then(CommandManager.argument("amount", IntegerArgumentType.integer(1))
+                                            .executes(context -> {
+                                                if (!(context.getSource().getEntity() instanceof ServerPlayerEntity sender)) {
+                                                    context.getSource().sendError(Text.literal("该指令只能由玩家在游戏内使用。"));
+                                                    return 0;
+                                                }
+                                                ServerPlayerEntity target = EntityArgumentType.getPlayer(context, "player");
+                                                int amt = IntegerArgumentType.getInteger(context, "amount");
+                                                if (sender.getUuid().equals(target.getUuid())) {
+                                                    context.getSource().sendError(Text.literal("❌ 不能给自己转账！"));
+                                                    return 0;
+                                                }
+                                                DatabaseManager.ensurePlayer(target.getUuid(), target.getName().getString());
+                                                if (DatabaseManager.deductPoints(sender.getUuid(), amt, "转账支出")) {
+                                                    DatabaseManager.addPoints(target.getUuid(), amt, "转账收入");
+                                                    context.getSource().sendFeedback(() -> Text.literal("✅ 转账成功！已向 ")
+                                                            .append(Text.literal(target.getName().getString()).formatted(Formatting.AQUA))
+                                                            .append(Text.literal(" 支付 "))
+                                                            .append(Text.literal(String.valueOf(amt)).formatted(Formatting.GOLD, Formatting.BOLD))
+                                                            .append(Text.literal(" 积分。")), false);
+                                                    target.sendMessage(Text.literal("💰 收到玩家 ")
+                                                            .append(Text.literal(sender.getName().getString()).formatted(Formatting.AQUA))
+                                                            .append(Text.literal(" 转来的 "))
+                                                            .append(Text.literal(String.valueOf(amt)).formatted(Formatting.GOLD, Formatting.BOLD))
+                                                            .append(Text.literal(" 积分！")), false);
+                                                } else {
+                                                    context.getSource().sendError(Text.literal("❌ 积分不足，转账失败！当前余额: " + DatabaseManager.getBalance(sender.getUuid())));
+                                                }
                                                 return 1;
                                             })
                                     )

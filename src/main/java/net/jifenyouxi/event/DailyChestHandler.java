@@ -1,9 +1,11 @@
 package net.jifenyouxi.event;
 
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.jifenyouxi.JifenyouxiMod;
 import net.jifenyouxi.database.DatabaseManager;
 import net.jifenyouxi.item.CardItem;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -20,6 +22,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProperties;
 
 import java.util.Random;
 
@@ -81,20 +84,43 @@ public class DailyChestHandler {
         if (world == null) return;
 
         long currentDay = world.getTimeOfDay() / 24000L;
-        if (currentDay != lastSpawnedDay) {
-            lastSpawnedDay = currentDay;
-            claimedToday = false;
+        if (currentDay == lastSpawnedDay) return;
 
-            // 放置在出生点正上方安全位置
-            BlockPos spawn = new BlockPos(0, 70, 0);
-            currentChestPos = spawn.up();
-            world.setBlockState(currentChestPos, Blocks.CHEST.getDefaultState());
+        lastSpawnedDay = currentDay;
+        claimedToday = false;
 
-            // 广播新宝箱刷新
-            server.getPlayerManager().broadcast(
-                    Text.literal("📦 [每日宝箱] 新的一天来临，出生点已刷新今日神秘宝箱！首位开启者有大奖！").formatted(Formatting.GOLD, Formatting.BOLD),
-                    false
-            );
+        // 清理昨日未被开启的旧宝箱
+        if (currentChestPos != null) {
+            world.removeBlock(currentChestPos, false);
+            currentChestPos = null;
         }
+
+        // 读取真实的世界出生点坐标 (替代旧版硬编码 0,70,0)
+        WorldProperties props = world.getLevelProperties();
+        BlockPos spawn = new BlockPos(props.getSpawnX(), props.getSpawnY(), props.getSpawnZ());
+
+        // 放置宝箱并清理上方遮挡，确保任何地形下都可见可点
+        currentChestPos = spawn;
+        world.setBlockState(spawn, Blocks.CHEST.getDefaultState());
+        world.setBlockState(spawn.up(), Blocks.AIR.getDefaultState());
+        world.setBlockState(spawn.up(2), Blocks.AIR.getDefaultState());
+
+        // 在宝箱内预填基础战利品，避免开箱空空如也
+        if (world.getBlockEntity(spawn) instanceof ChestBlockEntity chest) {
+            chest.setStack(4, new ItemStack(Items.GOLD_INGOT, 3 + RANDOM.nextInt(6)));
+            chest.setStack(12, new ItemStack(Items.EMERALD, 2 + RANDOM.nextInt(5)));
+            chest.setStack(22, new ItemStack(Items.EXPERIENCE_BOTTLE, 4 + RANDOM.nextInt(8)));
+            chest.markDirty();
+        }
+
+        JifenyouxiMod.LOGGER.info("每日宝箱已刷新于出生点: X={} Y={} Z={}", spawn.getX(), spawn.getY(), spawn.getZ());
+
+        // 广播新宝箱刷新（附上精确坐标提示）
+        server.getPlayerManager().broadcast(
+                Text.literal("📦 [每日宝箱] 新的一天来临！今日神秘宝箱已刷新在出生点 ")
+                        .append(Text.literal("[X=" + spawn.getX() + " Y=" + spawn.getY() + " Z=" + spawn.getZ() + "]").formatted(Formatting.AQUA))
+                        .append(Text.literal("，首位开启者有大奖！")).formatted(Formatting.GOLD, Formatting.BOLD),
+                false
+        );
     }
 }
